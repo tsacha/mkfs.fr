@@ -1,0 +1,19 @@
+# Directory in which to place saslauthd's listening socket, pid file, and so
+# on.  This directory must already exist.
+{% if grains['os'] == 'Fedora' %}
+SOCKETDIR=/run/saslauthd
+MECH=ldap
+{% elif grains['os'] == 'Debian' %}
+DESC="SASL Authentication Daemon"
+NAME="saslauthd"
+START=yes
+SOCKETDIR=/var/run/saslauthd
+MECHANISMS="ldap"
+{% endif %}
+
+
+{% if grains['os'] == 'Fedora' %}
+FLAGS='-O /etc/sasl2/saslauthd.conf'
+{% elif grains['os'] == 'Debian' %}
+OPTIONS="-c -m /var/run/saslauthd -O /etc/saslauthd.conf"
+{% endif %}

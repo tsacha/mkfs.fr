@@ -1,0 +1,10 @@
+[Unit]
+Description=Backing up MariaDB every hour
+
+[Timer]
+OnCalendar=*-*-* *:40:00
+Persistent=yes
+Unit=bak-mariadb.service
+
+[Install]
+WantedBy=basic.target

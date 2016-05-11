@@ -1,0 +1,4 @@
+BASE         {{ pillar['ldap']['uri'] }}
+URI          ldaps://{{ pillar['ldap']['uri'] }}
+TLS_REQCERT  allow
+TIMELIMIT    2

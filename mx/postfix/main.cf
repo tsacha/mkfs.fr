@@ -1,0 +1,80 @@
+compatibility_level = 2
+mail_owner = postfix
+myhostname = {{ grains['nodename'] }}
+inet_interfaces = all
+
+virtual_mailbox_domains = ldap:/etc/postfix/ldap-domains.cf
+virtual_alias_maps = ldap:/etc/postfix/ldap-aliases.cf
+virtual_mailbox_maps = ldap:/etc/postfix/ldap-accounts.cf
+virtual_mailbox_base = /srv/vmails/
+virtual_minimum_uid = 5000
+virtual_gid_maps = static:5000
+virtual_uid_maps = static:5000
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+
+recipient_delimiter = +
+
+unknown_local_recipient_reject_code = 550
+mynetworks =
+  {{ pillar['network']['common']['common_ip4'] }}/{{ pillar['network']['common']['common_cidr4'] }},
+{%- for host in pillar['network']['physical'] %}
+  {%- if 'grains' in pillar['network']['physical'][host]['public_ip6'] %}
+    {%- if grains[pillar['network']['physical'][host]['public_ip6'].split(':')[1]] is defined %}
+      {%- set in_public6 = grains[pillar['network']['physical'][host]['public_ip6'].split(':')[1]] %}
+    {%- endif %}
+  {%- else %}
+    {%- set in_public6 = pillar['network']['physical'][host]['public_ip6'] %}
+  {%- endif %}
+  [{{ in_public6 }}/{{ pillar['network']['physical'][host]['public_cidr6'] }}],
+{%- endfor %}
+  127.0.0.0/8,
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+
+disable_vrfy_command = yes
+smtpd_delay_reject = yes
+smtpd_helo_required = yes
+smtpd_helo_restrictions = permit_mynetworks,
+     reject_non_fqdn_hostname,
+     reject_invalid_hostname,
+     permit
+smtpd_recipient_restrictions =
+   permit_sasl_authenticated,
+   reject_invalid_hostname,
+   reject_non_fqdn_hostname,
+   reject_non_fqdn_sender,
+   reject_non_fqdn_recipient,
+   reject_unknown_sender_domain,
+   reject_unknown_recipient_domain,
+   permit_mynetworks,
+   reject_rbl_client sbl.spamhaus.org,
+   reject_rbl_client cbl.abuseat.org,
+   reject_rbl_client dul.dnsbl.sorbs.net,
+   permit
+smtpd_error_sleep_time = 1s
+smtpd_soft_error_limit = 10
+smtpd_hard_error_limit = 20
+
+smtpd_sender_restrictions=
+        reject_unknown_sender_domain,
+        reject_unlisted_sender,
+        permit
+
+smtpd_sasl_type   = dovecot
+smtpd_sasl_path   = private/auth
+
+inet_protocols = all
+
+smtpd_tls_cert_file = /etc/dovecot/{{ pillar['mx']['cert'] }}.crt
+smtpd_tls_key_file = /etc/dovecot/{{ pillar['mx']['cert'] }}.key
+smtpd_tls_CAfile = /etc/dovecot/{{ pillar['mx']['cert'] }}.ca.crt
+smtpd_use_tls=yes
+smtpd_tls_security_level = may
+smtp_tls_key_file = $smtpd_tls_key_file
+smtp_tls_cert_file = $smtpd_tls_cert_file
+
+smtpd_milters = unix:/var/run/rmilter/rmilter.sock
+milter_protocol = 6
+milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
+milter_default_action = accept

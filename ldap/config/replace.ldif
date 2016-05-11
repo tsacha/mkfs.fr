@@ -1,0 +1,38 @@
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/openldap/ssl/cert.pem
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/ssl/key.pem
+-
+delete: olcTLSCACertificatePath
+-
+replace: olcTLSVerifyClient
+olcTLSVerifyClient: never
+
+dn: olcDatabase={0}config,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" write by dn.base="cn=admin,{{ pillar['ldap']['dn'] }}" read by * none
+
+dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" write by dn.base="cn=admin,{{ pillar['ldap']['dn'] }}" read by * none
+
+dn: olcDatabase={2}mdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to attrs=userPassword by anonymous auth by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by self write by * none
+olcAccess: {1}to dn.sub="ou=users,ou=virtual,{{ pillar['ldap']['dn'] }}" by anonymous auth by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by self write by * none
+olcAccess: {2}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" write by dn.base="cn=admin,{{ pillar['ldap']['dn'] }}" read by * none
+-
+add: olcRootPW
+olcRootPW: {{ pillar['ldap']['root']['hashed_passwd'] }}
+-
+replace: olcSuffix
+olcSuffix: {{ pillar['ldap']['dn'] }}
+-
+replace: olcRootDN
+olcRootDN: cn=admin,{{ pillar['ldap']['dn'] }}

@@ -1,0 +1,85 @@
+{%- set suffix = pillar['network']['hosts'][grains['id']]['host'] %}
+*mangle
+:PREROUTING ACCEPT [3484:588090]
+:INPUT ACCEPT [3300:574942]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [3092:841534]
+:POSTROUTING ACCEPT [3092:841534]
+COMMIT
+*nat
+:PREROUTING ACCEPT [151:12072]
+:INPUT ACCEPT [151:12072]
+:OUTPUT ACCEPT [426:40111]
+:POSTROUTING ACCEPT [426:40111]
+{%- if grains['virtual'] == "physical" %}
+-A POSTROUTING -s {{ pillar['network'][grains['virtual']][suffix]['private_ip4'] }}/{{ pillar['network']['common']['private_cidr4'] }} -j MASQUERADE
+  {%- for host in pillar['network']['hosts'] %}
+    {%- if host != grains['id'] and pillar['network']['hosts'][host]['host'] == suffix %}
+      {%- if pillar['network']['hosts'][host]['firewall'] is defined %}
+        {%- if 'grains' in pillar['network']['hosts'][grains['id']]['ip'][0] %}
+          {%- if grains[pillar['network']['hosts'][grains['id']]['ip'][0].split(':')[1]] is defined %}
+            {%- set public_ip = grains[pillar['network']['hosts'][grains['id']]['ip'][0].split(':')[1]] %}
+          {%- endif %}
+        {%- else %}
+          {%- set public_ip = pillar['network']['hosts'][grains['id']]['ip'][0] %}
+        {%- endif %}
+        {%- if pillar['network']['hosts'][host]['firewall']['TCP'] is defined %}
+          {%- for entry in pillar['network']['hosts'][host]['firewall']['TCP'] %}
+-A PREROUTING -d {{ public_ip }}/32 -p tcp -m tcp --dport {{ entry }} -j DNAT --to-destination {{ pillar['network']['hosts'][host]['ip'][0] }}:{{ entry }}
+          {%- endfor %}
+        {%- endif %}
+
+        {%- if pillar['network']['hosts'][host]['firewall']['UDP'] is defined %}
+          {%- for entry in pillar['network']['hosts'][host]['firewall']['UDP'] %}
+-A PREROUTING -d {{ public_ip }}/32 -p udp -m udp --dport {{ entry }} -j DNAT --to-destination {{ pillar['network']['hosts'][host]['ip'][0] }}:{{ entry }}
+          {%- endfor %}
+        {%- endif %}
+      {%- endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+COMMIT
+*filter
+:INPUT DROP [0:0]
+{%- if grains['virtual'] == "physical" %}
+:FORWARD ACCEPT [0:0]
+{%- else %}
+:FORWARD DROP [0:0]
+{%- endif %}
+:OUTPUT ACCEPT [3092:841534]
+-A INPUT -i lo -j ACCEPT
+{%- if pillar['network'][grains['virtual']][suffix]['bridge'] is defined %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['bridge'] }} -p icmp -j ACCEPT
+{%- endif %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p icmp -j ACCEPT
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -j ACCEPT
+{%- if grains['virtual'] == "physical" %}
+  {%- for server in pillar['network']['hosts'] %}
+    {%- if server != grains['id'] and pillar['network']['hosts'][server]['virtual'] == 'physical' %}
+      {%- if 'grains' in pillar['network']['hosts'][server]['ip'][0] %}
+        {%- if grains[pillar['network']['hosts'][server]['ip'][0].split(':')[1]] is defined %}
+          {%- set in_ip4 = grains[pillar['network']['hosts'][server]['ip'][0].split(':')[1]] %}
+        {%- endif %}
+      {%- else %}
+        {%- set in_ip4 = pillar['network']['hosts'][server]['ip'][0] %}
+      {%- endif %}    
+-A INPUT -s {{ in_ip4 }}/32 -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -j ACCEPT 
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+-A INPUT -s {{ pillar['network']['common']['common_ip4'] }}/{{ pillar['network']['common']['common_cidr4'] }} -j ACCEPT
+{%- if pillar['network']['hosts'][grains['id']]['firewall'] is defined %}
+  {%- if pillar['network']['hosts'][grains['id']]['firewall']['TCP'] is defined %}
+    {%- for entry in pillar['network']['hosts'][grains['id']]['firewall']['TCP'] %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p tcp -m tcp --dport {{ entry }} -j ACCEPT 
+    {%- endfor %}
+  {%- endif %}
+
+  {%- if pillar['network']['hosts'][grains['id']]['firewall']['UDP'] is defined %}
+    {%- for entry in pillar['network']['hosts'][grains['id']]['firewall']['UDP'] %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p udp -m udp --dport {{ entry }} -j ACCEPT 
+    {%- endfor %}
+  {%- endif %}
+{%- endif %}
+COMMIT

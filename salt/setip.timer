@@ -1,0 +1,9 @@
+[Unit]
+Description=Update dynamic IPs in DNS zones (timer)
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target

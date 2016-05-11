@@ -1,0 +1,8 @@
+server_host = ldaps://{{ pillar['ldap']['uri'] }}
+bind = yes
+bind_dn = cn=admin,{{ pillar['ldap']['dn'] }}
+bind_pw = {{ pillar['ldap']['root']['passwd'] }}
+version = 3
+search_base = ou=users,ou=virtual,{{ pillar['ldap']['dn'] }}
+query_filter = (&(objectClass=inetOrgPerson)(uid=%u))
+result_attribute = mail

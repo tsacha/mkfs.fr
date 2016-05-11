@@ -1,0 +1,10 @@
+[Unit]
+Description=Backing up PostgreSQL every hour
+
+[Timer]
+OnCalendar=*-*-* *:35:00
+Persistent=yes
+Unit=bak-postgres.service
+
+[Install]
+WantedBy=basic.target

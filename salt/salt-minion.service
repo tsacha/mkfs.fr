@@ -1,0 +1,10 @@
+[Unit]
+Description=The Salt Minion
+After=systemd-networkd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/salt-minion
+
+[Install]
+WantedBy=multi-user.target

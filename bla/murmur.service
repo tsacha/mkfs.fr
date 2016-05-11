@@ -1,0 +1,13 @@
+[Unit]
+Description=Mumble Server (Murmur)
+Requires=systemd-networkd.service
+After=systemd-networkd.service
+
+[Service]
+User=root
+Type=forking
+PIDFile=/srv/murmur/murmur.pid
+ExecStart=/srv/murmur/murmur.x86 -ini /srv/murmur/murmur.ini
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+dn: {{ pillar['ldap']['dn'] }}
+objectClass: dcObject
+objectClass: organization
+o: {{ pillar['ldap']['o'] }}
+
+dn: ou=virtual,{{ pillar['ldap']['dn'] }}
+objectClass: organizationalUnit
+
+dn: ou=users,ou=virtual,{{ pillar['ldap']['dn'] }}
+objectClass: organizationalUnit
+
+dn: ou=groups,ou=virtual,{{ pillar['ldap']['dn'] }}
+objectClass: organizationalUnit
+
+dn: ou=domains,ou=virtual,{{ pillar['ldap']['dn'] }}
+objectClass: organizationalUnit
+
+dn: ou=aliases,ou=virtual,{{ pillar['ldap']['dn'] }}
+objectClass: organizationalUnit

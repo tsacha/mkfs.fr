@@ -1,0 +1,19 @@
+$TTL 1d
+$ORIGIN 10.in-addr.arpa.
+{%- set soa = pillar['zones']['common']['SOA']['@'] %}
+@ IN SOA local. {{ soa['email-addr'] }} {{ soa['sn'] }} {{ soa['refresh'] }} {{ soa['retry'] }} {{ soa['expiry'] }} {{ soa['ttl'] }}
+
+{%- if pillar['zones']['common']['NS'] is defined -%}
+{%- for entry in pillar['zones']['common']['NS'] -%}
+{% for address in pillar['zones']['common']['NS'][entry] %}
+{{ entry }} IN NS {{ address }}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{%- for host in pillar['network']['hosts'] %}
+{%- if pillar['network']['hosts'][host]['virtual'] == "LXC" %}
+{%- set ip = pillar['network']['hosts'][host]['ip'][0] %}
+{{ ip.split('.')[3] }}.{{ ip.split('.')[2] }}.{{ ip.split('.')[1] }} IN PTR {{ host }}.
+{%- endif %}
+{%- endfor %}

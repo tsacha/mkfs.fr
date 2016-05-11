@@ -1,0 +1,9 @@
+[Unit]
+Description=Backing up folders
+
+[Service]
+Type=oneshot
+{%- for path in pillar['bak']['paths'][grains['nodename']] %}
+ExecStart=/usr/bin/ssh bak -C 'mkdir -p /srv/bak/live/{{ grains['nodename'] }}/path-{{ path }}/'
+ExecStart=/usr/bin/rsync -avh --delete-after {{ pillar['bak']['paths'][grains['nodename']][path] }} bak:/srv/bak/live/{{ grains['nodename'] }}/path-{{ path }}/
+{%- endfor %}

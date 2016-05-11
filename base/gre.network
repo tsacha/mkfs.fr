@@ -1,0 +1,11 @@
+[Match]
+Name=gre{{ id }}{{ rid }}
+
+[Network]
+Address=10.40.{{ id }}.{{ rid }}/32
+
+[Route]
+Destination={{ rprivate }}/{{ pillar['network']['common']['private_cidr4'] }}
+
+[Route]
+Destination=10.40.{{ rid }}.{{ id }}/32

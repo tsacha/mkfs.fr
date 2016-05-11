@@ -1,0 +1,10 @@
+[Unit]
+Description=another sendmail filter
+
+[Service]
+User=rmilter
+ExecStart=/usr/sbin/rmilter -n -c /etc/rmilter/rmilter.conf
+ExecReload=/bin/kill -USR1 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

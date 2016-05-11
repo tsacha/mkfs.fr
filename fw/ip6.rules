@@ -1,0 +1,72 @@
+{%- set suffix = pillar['network']['hosts'][grains['id']]['host'] %}
+*mangle
+:PREROUTING ACCEPT [3484:588090]
+:INPUT ACCEPT [3300:574942]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [3092:841534]
+:POSTROUTING ACCEPT [3092:841534]
+COMMIT
+*nat
+:PREROUTING ACCEPT [151:12072]
+:INPUT ACCEPT [151:12072]
+:OUTPUT ACCEPT [426:40111]
+:POSTROUTING ACCEPT [426:40111]
+COMMIT
+*filter
+:INPUT DROP [0:0]
+{%- if grains['virtual'] == "physical" %}
+:FORWARD ACCEPT [0:0]
+{%- else %}
+:FORWARD DROP [0:0]
+{%- endif %}
+:OUTPUT ACCEPT [3092:841534]
+-A INPUT -i lo -j ACCEPT
+{%- if pillar['network'][grains['virtual']][suffix]['bridge'] is defined %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['bridge'] }} -p ipv6-icmp -j ACCEPT
+{%- endif %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p ipv6-icmp -j ACCEPT
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -j ACCEPT
+{%- for server in pillar['network']['hosts'] %}
+  {%- if pillar['network']['hosts'][server]['virtual'] == 'physical' %}
+    {%- set out_suffix = pillar['network']['hosts'][server]['host'] %}
+    {%- if 'grains' in pillar['network']['physical'][suffix]['public_ip6'] %}
+      {%- if grains[pillar['network']['physical'][suffix]['public_ip6'].split(':')[1]] is defined %}
+        {%- set in_public6 = grains[pillar['network']['physical'][suffix]['public_ip6'].split(':')[1]] %}
+      {%- endif %}
+    {%- else %}
+      {%- set in_public6 = pillar['network']['physical'][suffix]['public_ip6'] %}
+    {%- endif %}
+    {%- set in_cidr6 = pillar['network']['physical'][suffix]['public_cidr6'] %}
+    {%- if 'grains' in pillar['network']['physical'][out_suffix]['public_ip6'] %}
+      {%- if grains[pillar['network']['physical'][out_suffix]['public_ip6'].split(':')[1]] is defined %}
+        {%- set out_public6 = grains[pillar['network']['physical'][out_suffix]['public_ip6'].split(':')[1]] %}
+      {%- endif %}
+    {%- else %}
+      {%- set out_public6 = pillar['network']['physical'][out_suffix]['public_ip6'] %}
+    {%- endif %}
+    {%- set out_cidr6 = pillar['network']['physical'][out_suffix]['public_cidr6'] %}
+-A INPUT -s {{ in_public6 }}/{{ in_cidr6 }} -d {{ out_public6 }}/{{ out_cidr6 }} -j ACCEPT
+-A INPUT -s {{ out_public6 }}/{{ out_cidr6 }} -d {{ in_public6 }}/{{ in_cidr6 }} -j ACCEPT
+  {%- endif %}
+{%- endfor %}
+{%- if pillar['network']['hosts'][grains['id']]['firewall'] is defined %}
+  {%- if pillar['network']['hosts'][grains['id']]['firewall']['TCP'] is defined %}
+    {%- for entry in pillar['network']['hosts'][grains['id']]['firewall']['TCP'] %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p tcp -m tcp --dport {{ entry }} -j ACCEPT 
+    {%- endfor %}
+  {%- endif %}
+
+  {%- if pillar['network']['hosts'][grains['id']]['firewall']['TCP6'] is defined %}
+    {%- for entry in pillar['network']['hosts'][grains['id']]['firewall']['TCP6'] %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p tcp -m tcp --dport {{ entry }} -j ACCEPT 
+    {%- endfor %}
+  {%- endif %}
+
+  {%- if pillar['network']['hosts'][grains['id']]['firewall']['UDP'] is defined %}
+    {%- for entry in pillar['network']['hosts'][grains['id']]['firewall']['UDP'] %}
+-A INPUT -i {{ pillar['network'][grains['virtual']][suffix]['int'] }} -p udp -m udp --dport {{ entry }} -j ACCEPT 
+    {%- endfor %}
+  {%- endif %}
+{%- endif %}
+COMMIT

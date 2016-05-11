@@ -1,0 +1,7 @@
+[NetDev]
+Name=gre{{ id }}{{ rid }}
+Kind=gre
+MTUBytes=1480
+ 
+[Tunnel]
+Remote={{ remote }}

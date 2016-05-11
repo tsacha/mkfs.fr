@@ -1,0 +1,8 @@
+{%- if grains['virtual'] == "physical" -%}
+{%- for key in pillar['pubkeys']['physical'] %}
+{{ key }}
+{%- endfor -%}
+{%- endif -%}
+{%- for key in pillar['pubkeys']['virtual'] %}
+{{ key }}
+{%- endfor -%}

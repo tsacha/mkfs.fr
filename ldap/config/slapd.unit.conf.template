@@ -1,0 +1,12 @@
+[Service]
+# Use the classical configuration file:
+#Environment="SLAPD_OPTIONS=-f /etc/openldap/slapd.conf"
+# Use the slapd configuration directory:
+Environment="SLAPD_OPTIONS=-F /etc/openldap/slapd.d"
+
+Environment="SLAPD_URLS=ldaps://[{{ pillar['network']['ip'][3] }}]:636 ldaps://{{ pillar['network']['ip'][2]}}:636 ldap://[{{ pillar['network']['ip'][3] }}] ldap://{{ pillar['network']['ip'][2]}} ldapi:///"
+# Other examples:
+#Environment="SLAPD_URLS=ldap://127.0.0.1/ ldap://10.0.0.1:1389/ cldap:///"
+
+# Specify the kerberos keytab file
+#Environment=KRB5_KTNAME=/etc/openldap/krb5-ldap.keytab

@@ -1,0 +1,9 @@
+[Unit]
+Description=Update dynamic IPs in DNS zones
+
+[Service]
+Type=simple
+ExecStart=/opt/ips/setip.py
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,100 @@
+$TTL 1d
+$ORIGIN {{ zone[1] }}
+{% for entry in pillar['zones'][zone[1]]['SOA'] -%}
+{%- set data = pillar['zones'][zone[1]]['SOA'][entry] -%}
+{%- set common = pillar['zones'][zone[0]]['SOA'][entry] -%}
+{{ entry }} IN SOA {{ data['name-server'] }} {{ common['email-addr'] }} {{ common['sn'] }} {{ common['refresh'] }} {{ common['retry'] }} {{ common['expiry'] }} {{ common['ttl'] }}
+{%- endfor -%}
+
+
+{%- for current in zone -%}
+
+{% if pillar['zones'][current]['NS'] is defined -%}
+{% for entry in pillar['zones'][current]['NS'] -%}
+{% for address in pillar['zones'][current]['NS'][entry] %}
+{{ entry }} IN NS {{ address }}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones'][current]['MX'] is defined -%}
+{% for entry in pillar['zones'][current]['MX'] -%}
+{%- for address in pillar['zones'][current]['MX'][entry] %}
+{{ entry }} IN MX {{ pillar['zones'][current]['MX'][entry][address] }} {{ address }}
+{%- endfor %}
+{% endfor -%}
+{%- endif -%}
+
+
+{% if pillar['zones'][current]['SPF'] is defined -%}
+{% for entry in pillar['zones'][current]['SPF'] -%}
+@ IN TXT "v=spf1
+{%- for address in pillar['zones'][current]['SPF'][entry] %}
+{%- if ":" in address %} ip6:{{ address }}{% else %} ip4:{{ address }}{% endif %}
+{%- endfor %} -all"
+@ IN SPF "v=spf1
+{%- for address in pillar['zones'][current]['SPF'][entry] %}
+{%- if ":" in address %} ip6:{{ address }}{% else %} ip4:{{ address }}{% endif %}
+{%- endfor %} -all"
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones'][current]['A'] is defined -%}
+{%- for entry in pillar['zones'][current]['A'] %}
+{%- for address in pillar['zones'][current]['A'][entry] %}
+{%- if "grains" in address %}
+{%- if grains[address.split(':')[1]] is defined -%}
+{%- set naddress = grains[address.split(':')[1]] -%}
+{%- if ":" in naddress %}
+{{ entry }} IN AAAA {{ naddress }}
+{%- else %}
+{{ entry }} IN A {{ naddress }}
+{%- endif -%}
+{%- endif -%}
+{%- else -%}
+{%- if ":" in address %}
+{{ entry }} IN AAAA {{ address }}
+{%- else %}
+{{ entry }} IN A {{ address }}
+{%- endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones'][current]['CNAME'] is defined -%}
+{% for entry in pillar['zones'][current]['CNAME'] %}
+{{ entry }} IN CNAME {{ pillar['zones'][current]['CNAME'][entry] }}
+{%- endfor -%}
+{%- endif -%}
+
+
+{% if pillar['zones'][current]['SRV'] is defined -%}
+{% for entry in pillar['zones'][current]['SRV'] %}
+{%- if entry['name'] is defined -%}
+{%- set name = entry['name'] -%}
+{%- else -%}
+{%- set name = zone[1] -%}
+{%- endif %}
+{{ entry['service'] }}.{{ entry['proto'] }}.{{ name }} SRV {{ entry['priority'] }} {{ entry['weight'] }} {{ entry['port'] }} {{ entry['target'] }}
+{%- endfor -%}
+{%- endif -%}
+
+{%- if pillar['zones'][current]['TXT'] is defined -%}
+{%- for entry in pillar['zones'][current]['TXT'] %}
+{%- for row in entry %}
+{{ row }} IN TXT ({{ entry[row] }});
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{% if (pillar['zones'][current]['dnssec'] is defined) and (pillar['zones'][current]['dnssec']) %}
+$INCLUDE /etc/named/keys/K{{ current }}+00{{ pillar['zones'][current]['algo'] }}+{{ pillar['zones'][current]['ksk'] }}.key
+$INCLUDE /etc/named/keys/K{{ current }}+00{{ pillar['zones'][current]['algo'] }}+{{ pillar['zones'][current]['zsk'] }}.key
+{% endif -%}
+
+{% if pillar['zones'][current]['dkim'] is defined %}
+$INCLUDE /etc/named/dkim/{{ zone[1] }}.txt
+{% endif -%}
+
+{% endfor -%}

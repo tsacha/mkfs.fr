@@ -1,0 +1,10 @@
+[Unit]
+Description=Backing up folders every hour
+
+[Timer]
+OnCalendar=*-*-* *:30:00
+Persistent=yes
+Unit=bak-paths.service
+
+[Install]
+WantedBy=basic.target

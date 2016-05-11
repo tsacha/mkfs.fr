@@ -1,0 +1,114 @@
+$TTL 1d
+$ORIGIN local.
+{%- set soa = pillar['zones']['common']['SOA']['@'] %}
+@ IN SOA local. {{ soa['email-addr'] }} {{ soa['sn'] }} {{ soa['refresh'] }} {{ soa['retry'] }} {{ soa['expiry'] }} {{ soa['ttl'] }}
+
+{% if pillar['zones']['common']['NS'] is defined -%}
+{% for entry in pillar['zones']['common']['NS'] -%}
+{% for address in pillar['zones']['common']['NS'][entry] %}
+{{ entry }} IN NS {{ address }}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones']['common']['MX'] is defined -%}
+{% for entry in pillar['zones']['common']['MX'] -%}
+{%- for address in pillar['zones']['common']['MX'][entry] %}
+{{ entry }} IN MX {{ pillar['zones']['common']['MX'][entry][address] }} {{ address }}
+{%- endfor %}
+{% endfor -%}
+{%- endif -%}
+
+{% if pillar['zones']['common']['SPF'] is defined -%}
+{% for entry in pillar['zones']['common']['SPF'] -%}
+@ IN TXT "v=spf1
+{%- for address in pillar['zones']['common']['SPF'][entry] %}
+{%- if ":" in address %} ip6:{{ address }}{% else %} ip4:{{ address }}{% endif %}
+{%- endfor %} -all"
+@ IN SPF "v=spf1
+{%- for address in pillar['zones']['common']['SPF'][entry] %}
+{%- if ":" in address %} ip6:{{ address }}{% else %} ip4:{{ address }}{% endif %}
+{%- endfor %} -all"
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones']['common']['A'] is defined -%}
+{%- for entry in pillar['zones']['common']['A'] %}
+{%- for address in pillar['zones']['common']['A'][entry] %}
+{%- if "grains" in address %}
+{%- if grains[address.split(':')[1]] is defined -%}
+{%- set naddress = grains[address.split(':')[1]] -%}
+{%- if ":" in naddress %}
+{{ entry }} IN AAAA {{ naddress }}
+{%- else %}
+{{ entry }} IN A {{ naddress }}
+{%- endif -%}
+{%- endif -%}
+{%- else -%}
+{%- if ":" in address %}
+{{ entry }} IN AAAA {{ address }}
+{%- else %}
+{{ entry }} IN A {{ address }}
+{%- endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+{% if pillar['zones']['common']['CNAME'] is defined -%}
+{% for entry in pillar['zones']['common']['CNAME'] %}
+{{ entry }} IN CNAME {{ pillar['zones']['common']['CNAME'][entry] }}
+{%- endfor -%}
+{%- endif -%}
+
+
+{% if pillar['zones']['common']['SRV'] is defined -%}
+{% for entry in pillar['zones']['common']['SRV'] %}
+{%- if entry['name'] is defined -%}
+{%- set name = entry['name'] -%}
+{%- else -%}
+{%- set name = 'local.' -%}
+{%- endif %}
+{{ entry['service'] }}.{{ entry['proto'] }}.{{ name }} SRV {{ entry['priority'] }} {{ entry['weight'] }} {{ entry['port'] }} {{ entry['target'] }}
+{%- endfor -%}
+{%- endif -%}
+
+{%- if pillar['zones']['common']['TXT'] is defined -%}
+{%- for entry in pillar['zones']['common']['TXT'] %}
+{%- for row in entry %}
+{{ row }} IN TXT ({{ entry[row] }});
+{%- endfor -%}
+{%- endfor -%}
+{%- endif -%}
+
+
+{%- for host in pillar['network']['hosts'] %}
+{%- set suffix = pillar['network']['hosts'][host] %}
+  {%- if suffix['virtual'] == "LXC" %}
+    {%- for ip in suffix['ip'] %}
+      {%- if ":" in ip %}
+{{ host }}. IN AAAA {{ ip }}
+      {%- else %}
+{{ host }}. IN A {{ ip }}
+      {%- endif %}
+    {%- endfor %}
+  {%- else %}
+    {%- if 'grains' in suffix['ip'][0] %}
+      {%- if grains[suffix['ip'][0].split(':')[1]] is defined %}
+        {%- set ip = grains[suffix['ip'][0].split(':')[1]] %}
+      {%- endif %}
+    {%- else %}
+      {%- set ip = suffix['ip'][0] %}
+    {%- endif %}
+    {%- set raw6 = pillar['network']['physical'][suffix['host']]['public_ip6'] %}
+    {%- if 'grains' in raw6 %}
+      {%- if grains[raw6.split(':')[1]] is defined %}
+        {%- set ip6 = grains[raw6.split(':')[1]] %}
+      {%- endif %}
+    {%- else %}
+      {%- set ip6 = raw6 %}
+    {%- endif %}
+{{ host.split('.')[0] }}.local. IN A {{ ip }}
+{{ host.split('.')[0] }}.local. IN AAAA {{ ip6 }}
+  {%- endif %}
+{%- endfor %}

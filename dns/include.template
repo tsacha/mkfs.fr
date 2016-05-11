@@ -1,0 +1,41 @@
+{% for zone in zones %}
+{% if 'reverse4' in zone %}
+{% set domain = '10.in-addr.arpa.' %}
+{% elif 'reverse6-' in zone %}
+{%- set raw6 = pillar['network']['physical'][zone.split('-')[1].split('.')[0]]['public_ip6'] %}
+{%- if 'grains' in raw6 %}
+  {%- if grains[raw6.split(':')[1]] is defined %}
+    {%- set ip6 = grains[raw6.split(':')[1]] %}
+  {%- endif %}
+{%- else %}
+  {%- set ip6 = raw6 %}
+{%- endif %}
+{% set domain = "convert("+ip6+", "+pillar['network']['physical'][zone.split('-')[1].split('.')[0]]['public_cidr6']|string+")" %}
+{% else %}
+{% set domain = zone %}
+{% endif %}
+zone "{{ domain }}" {
+    file "/etc/named/zone.{{ zone }}";
+{%- if pillar['network']['hosts'][grains['nodename']]['host'] == "master" %}
+    type master;
+    notify yes;
+
+{%- if pillar['zones'][pillar['network']['common']['root_domain']+'.']['A']['ns2'] is defined %}
+    also-notify { {% for address in pillar['zones'][pillar['network']['common']['root_domain']+'.']['A']['ns2'] %} {{ address }}; {%- endfor %} };
+    allow-transfer { {% for address in pillar['zones'][pillar['network']['common']['root_domain']+'.']['A']['ns2'] %} {{ address }}; {%- endfor %} };
+{%- endif %}
+{%- if (pillar['zones'][zone] is defined) and (pillar['zones'][zone]['dnssec'] is defined) and (pillar['zones'][zone]['dnssec']) %}
+    key-directory "/etc/named/keys";
+    dnssec-dnskey-kskonly yes;
+    auto-dnssec maintain;
+    inline-signing yes;
+    sig-validity-interval 21 16;
+{%- endif %}
+{%- else %}
+    type slave;
+{%- if pillar['zones'][pillar['network']['common']['root_domain']+'.']['A']['ns1'] is defined %}
+    masters { {% for address in pillar['zones'][pillar['network']['common']['root_domain']+'.']['A']['ns1'] %} {{ address }}; {%- endfor %} };
+{%- endif %}
+{%- endif %}
+};
+{%- endfor %}
