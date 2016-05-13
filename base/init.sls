@@ -27,6 +27,7 @@ utils:
       - tmux
       - powerline
       - tmux-powerline
+      - nagios-plugins-all
 
 firewalld:
   service.dead:
@@ -61,6 +62,7 @@ utils:
       - htop
       - wget
       - lbzip2
+      - monitoring-plugins
 {% endif %}
 
 set timezone:

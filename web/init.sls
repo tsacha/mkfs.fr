@@ -28,6 +28,7 @@ php.packages:
       - php-intl
       - php-ldap
       - php-mysqlnd
+      - php-mbstring
       - php-pecl-mysql
       - php-pecl-pq
       - php-process

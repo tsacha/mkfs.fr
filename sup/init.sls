@@ -47,7 +47,6 @@ icinga.packages:
       - icinga2-common
       - icinga2-ido-pgsql
       - icingaweb2
-      - nagios-plugins-all
       - php-ldap
 
 /var/log/httpd:
