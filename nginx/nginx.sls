@@ -42,6 +42,7 @@ start nginx:
   service.running:
     - name: nginx
     - enable: true
+    - reload: true
     - require:
       - file: nginx configuration
       - cmd: generate dh

@@ -17,6 +17,10 @@
 {%- endif %}
     server_name {{ vhost.servername | join(' ') }};
 
+    location /basic_status {
+      stub_status;
+      access_log off;
+    }
 {%- if pillar['redirect_letsencrypt'] is defined and pillar['redirect_letsencrypt'] %}
     location /.well-known/acme-challenge {
       root /srv/certs/;

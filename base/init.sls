@@ -49,6 +49,13 @@ bashrc:
     - group: root
     - mode: '0644'
 
+influxdata-repo:
+  pkgrepo.managed:
+    - humanname: InfluxData
+    - baseurl: https://repos.influxdata.com/rhel/7/x86_64/stable/
+    - gpgcheck: 1
+    - gpgkey: https://repos.influxdata.com/influxdb.key
+
 {% elif grains['os'] == 'Debian' %}
 utils:
   pkg.installed:

@@ -11,8 +11,10 @@ base:
     - fw
     - base.network
   's1.mkfs.fr':
+    - sup.agent
     - certs.create
   's2.mkfs.fr':
+    - sup.agent
     - bak/server
   'dns*.local':
     - dns
@@ -30,13 +32,16 @@ base:
     - postgres.db
     - ldap
     - ldap.users
+    - idb
   'mx.local':
     - mx
     - rp
   'rp.local':
     - rp
+    - sup.agent
   'rp2.local':
     - rp
+    - sup.agent
   'web.local':
     - web
     - web.private.default
@@ -46,6 +51,9 @@ base:
     - web.private.glenn
     - web.private.charlotte
     - web.private.autoconfig
+  'web2.local':
+    - web
+    - sup.grafana
   'cloud.local':
     - web
     - cloud
@@ -70,6 +78,7 @@ base:
     - web
     - web.private.betaceramique
   'srv.s.tremoureux.fr':
+    - sup.agent
     - rp
     - web
     - web.private.srv
