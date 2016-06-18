@@ -12,7 +12,7 @@ $ORIGIN 10.in-addr.arpa.
 {%- endif -%}
 
 {%- for host in pillar['network']['hosts'] %}
-{%- if pillar['network']['hosts'][host]['virtual'] == "LXC" %}
+{%- if pillar['network']['hosts'][host]['virtual'] == "lxc" %}
 {%- set ip = pillar['network']['hosts'][host]['ip'][0] %}
 {{ ip.split('.')[3] }}.{{ ip.split('.')[2] }}.{{ ip.split('.')[1] }} IN PTR {{ host }}.
 {%- endif %}

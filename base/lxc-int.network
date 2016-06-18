@@ -1,10 +1,10 @@
 {%- set suffix = pillar['network']['hosts'][grains['id']]['host'] %}
 [Match]
-Name={{ pillar['network']['LXC'][suffix]['int'] }}
+Name={{ pillar['network']['lxc'][suffix]['int'] }}
 
 [Network]
 Address={{ pillar['network']['hosts'][grains['id']]['ip'][0] }}/{{ pillar['network']['common']['private_cidr4'] }}
-Address={{ pillar['network']['hosts'][grains['id']]['ip'][1] }}/{{ pillar['network']['LXC'][suffix]['public_cidr6'] }}
-Gateway={{ pillar['network']['LXC'][suffix]['gw_ip4'] }}
-Gateway={{ pillar['network']['LXC'][suffix]['public_ip6'] }}
+Address={{ pillar['network']['hosts'][grains['id']]['ip'][1] }}/{{ pillar['network']['lxc'][suffix]['public_cidr6'] }}
+Gateway={{ pillar['network']['lxc'][suffix]['gw_ip4'] }}
+Gateway={{ pillar['network']['lxc'][suffix]['public_ip6'] }}
 

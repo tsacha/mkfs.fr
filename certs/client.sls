@@ -1,5 +1,15 @@
 {% if pillar['certs'] is defined and pillar['certs'] %}
 {% for cert in pillar['certs'] %}
+ca {{ cert }}:
+  file.managed:
+    - name: /etc/ssl/ca/{{ cert }}.ca
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: true
+    - force: true
+    - source: 'salt://private/certs/{{ cert }}/ca.cer'
+
 crt {{ cert }}:
   file.managed:
     - name: /etc/ssl/certs/{{ cert }}.crt
@@ -8,7 +18,7 @@ crt {{ cert }}:
     - mode: 644
     - makedirs: true
     - force: true
-    - source: 'salt://private/certs/live/{{ cert }}/fullchain.pem'
+    - source: 'salt://private/certs/{{ cert }}/fullchain.cer'
 
 key {{ cert }}:
   file.managed:
@@ -19,6 +29,6 @@ key {{ cert }}:
     - makedirs: true
     - makedirs: true
     - force: true
-    - source: 'salt://private/certs/live/{{ cert }}/privkey.pem'
+    - source: 'salt://private/certs/{{ cert }}/{{ cert }}.key'
 {% endfor %}
 {% endif %}

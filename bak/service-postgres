@@ -4,7 +4,7 @@ Description=Backing up PostgreSQL
 [Service]
 Type=oneshot
 {%- for db in pillar['postgres']['dbs'] %}
-ExecStart=/usr/bin/ssh bak -C 'mkdir -p /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/'
-ExecStart=/bin/sh -c "/usr/bin/pg_dump -Upostgres -b {{ db }} | ssh bak -C 'cat - > /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.old.sql'"
-ExecStart=/usr/bin/ssh bak -C '/bin/cp /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.old.sql /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.sql'
+ExecStart=/usr/bin/ssh tobak -C 'mkdir -p /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/'
+ExecStart=/bin/sh -c "/usr/bin/pg_dump -Upostgres -b {{ db }} | ssh tobak -C 'cat - > /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.old.sql'"
+ExecStart=/usr/bin/ssh tobak -C '/bin/cp /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.old.sql /srv/bak/live/{{ grains['nodename'] }}/postgres-{{ db }}/{{ db }}.sql'
 {%- endfor %}

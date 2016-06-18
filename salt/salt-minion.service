@@ -4,7 +4,13 @@ After=systemd-networkd.service
 
 [Service]
 Type=simple
+{%- if grains['os'] == 'Fedora' %}
+Environment=VIRTUAL_ENV="/opt/venv"
+Environment=PATH="$VIRTUAL_ENV/bin:$PATH"
+ExecStart=/opt/venv/bin/salt-minion
+{%- elif grains['os'] == 'Debian' %}
 ExecStart=/usr/bin/salt-minion
+{%- endif %}
 
 [Install]
 WantedBy=multi-user.target

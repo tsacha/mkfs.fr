@@ -49,7 +49,7 @@ systemd-networkd:
 {%- else %}
 interface configuration:
   file.managed:
-    - name: /etc/systemd/network/{{ pillar['network']['LXC'][pillar['network']['hosts'][grains['id']]['host']]['int'] }}.network
+    - name: /etc/systemd/network/{{ pillar['network']['lxc'][pillar['network']['hosts'][grains['id']]['host']]['int'] }}.network
     - template: jinja
     - source: 'salt://base/lxc-int.network'
     - user: root

@@ -70,6 +70,10 @@ utils:
       - wget
       - lbzip2
       - monitoring-plugins
+      - python-pip
+      - libffi-dev
+      - libssl-dev
+      - swig
 {% endif %}
 
 set timezone:
@@ -117,7 +121,7 @@ add limits.conf:
     - source: 'salt://base/limits.conf'
     - template: jinja
 
-{% if grains['virtual'] == 'LXC' %}
+{% if grains['virtual']|lower == 'lxc' %}
 auditd:
   service.dead:
     - disabled: true
@@ -146,6 +150,7 @@ sysctl configuration:
     - group: root
     - mode: '0644'
     - source: 'salt://base/sysctl.conf'
+{% endif %}
 
 sshd configuration file:
   file.managed:
@@ -162,7 +167,6 @@ sshd:
     - provider : system
     - watch:
       - file: sshd configuration file
-{% endif %}
 
 ssh authorized keys:
   file.managed:

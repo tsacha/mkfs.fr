@@ -24,6 +24,7 @@ php.packages:
       - php-pecl-zip
       - php-gd
       - php-pgsql
+      - php-opcache
       - php-xml
       - php-intl
       - php-ldap

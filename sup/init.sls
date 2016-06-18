@@ -61,14 +61,13 @@ icinga.packages:
   file.managed:
     - mode: '4755'
 
-/var/run/icinga2/cmd:
-  file.directory:
-    - user: apache
-    - group: icingacmd
-    - mode: 775
-    - require:
-      - pkg: icinga.packages
-
+# /var/run/icinga2/cmd:
+#   file.directory:
+#     - user: apache
+#     - group: icingacmd
+#     - mode: 775
+#     - require:
+#       - pkg: icinga.packages
 
 /etc/php.ini:
   file.managed:
@@ -92,14 +91,31 @@ icinga2:
 
 
 {% for cert in pillar['certs'] %}
-im crt {{ cert }}:
-  file.copy:
+sup ca {{ cert }}:
+  file.managed:
+    - name: /etc/icinga2/pki/{{ cert }}.ca
+    - user: icinga
+    - group: icinga
+    - mode: 644
+    - makedirs: true
+    - source: /etc/ssl/ca/{{ cert }}.ca
+    - require:
+      - pkg: icinga.packages
+      - file: ca {{ cert }}
+    - watch:
+      - file: ca {{ cert }}
+    - require_in:
+      - service: icinga2
+    - watch_in:
+      - service: icinga2
+
+sup crt {{ cert }}:
+  file.managed:
     - name: /etc/icinga2/pki/{{ cert }}.crt
     - user: icinga
     - group: icinga
     - mode: 644
     - makedirs: true
-    - force: true
     - source: /etc/ssl/certs/{{ cert }}.crt
     - require:
       - pkg: icinga.packages
@@ -111,14 +127,13 @@ im crt {{ cert }}:
     - watch_in:
       - service: icinga2
 
-im key {{ cert }}:
-  file.copy:
+sup key {{ cert }}:
+  file.managed:
     - name: /etc/icinga2/pki/{{ cert }}.key
     - user: icinga
     - group: icinga
     - mode: 400
     - makedirs: true
-    - force: true
     - source: /etc/ssl/private/{{ cert }}.key
     - require:
       - pkg: icinga.packages

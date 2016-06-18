@@ -66,15 +66,32 @@ smtpd_sasl_path   = private/auth
 
 inet_protocols = all
 
+tls_high_cipherlist=EDH+CAMELLIA:EDH+aRSA:EECDH+aRSA+AESGCM:EECDH+aRSA+SHA256:EECDH:+CAMELLIA128:+AES128:+SSLv3:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!IDEA:!ECDSA:kEDH:CAMELLIA128-SHA:AES128-SHA
+tls_preempt_cipherlist=yes
+tls_ssl_options = NO_COMPRESSION
+
 smtpd_tls_cert_file = /etc/dovecot/{{ pillar['mx']['cert'] }}.crt
 smtpd_tls_key_file = /etc/dovecot/{{ pillar['mx']['cert'] }}.key
 smtpd_tls_CAfile = /etc/dovecot/{{ pillar['mx']['cert'] }}.ca.crt
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtpd_tls_mandatory_ciphers=high
+smtpd_tls_eecdh_grade=ultra
+smtpd_tls_received_header = yes
+smtpd_tls_loglevel = 1
 smtpd_use_tls=yes
 smtpd_tls_security_level = may
+
 smtp_tls_key_file = $smtpd_tls_key_file
 smtp_tls_cert_file = $smtpd_tls_cert_file
+smtp_tls_security_level = may
+smtp_tls_mandatory_protocols = TLSv1, TLSv1.1, TLSv1.2
+smtp_tls_mandatory_ciphers = high
+smtp_tls_eecdh_grade=ultra
+smtp_tls_received_header = yes
+smtp_tls_loglevel = 1
 
 smtpd_milters = unix:/var/run/rmilter/rmilter.sock
 milter_protocol = 6
 milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
 milter_default_action = accept
+

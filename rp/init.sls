@@ -18,13 +18,12 @@ include:
 {% if not pillar['disable_tls'] %}
 {% for cert in pillar['certs'] %}
 nginx crt {{ cert }}:
-  file.copy:
+  file.managed:
     - name: /etc/nginx/certs/{{ cert }}.crt
     - user: {{ nginx_user }}
     - group: {{ nginx_user }}
     - mode: 644
     - makedirs: true
-    - force: true
     - source: /etc/ssl/certs/{{ cert }}.crt
     - require:
       - file: crt {{ cert }}
@@ -36,13 +35,12 @@ nginx crt {{ cert }}:
       - service: start nginx
 
 nginx key {{ cert }}:
-  file.copy:
+  file.managed:
     - name: /etc/nginx/private/{{ cert }}.key
     - user: {{ nginx_user }}
     - group: {{ nginx_user }}
     - mode: 400
     - makedirs: true
-    - force: true
     - source: /etc/ssl/private/{{ cert }}.key
     - require:
       - file: key {{ cert }}

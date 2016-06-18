@@ -4,7 +4,7 @@ Description=Backing up MariaDB
 [Service]
 Type=oneshot
 {%- for db in pillar['mariadb']['dbs'] %}
-ExecStart=/usr/bin/ssh bak -C 'mkdir -p /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/'
-ExecStart=/bin/sh -c "/usr/bin/mysqldump --databases {{ db }} -p{{ pillar['mariadb']['pwd'] }} | ssh bak -C 'cat - > /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.old.sql'"
-ExecStart=/usr/bin/ssh bak -C '/bin/cp /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.old.sql /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.sql'
+ExecStart=/usr/bin/ssh tobak -C 'mkdir -p /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/'
+ExecStart=/bin/sh -c "/usr/bin/mysqldump --databases {{ db }} -p{{ pillar['mariadb']['pwd'] }} | ssh tobak -C 'cat - > /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.old.sql'"
+ExecStart=/usr/bin/ssh tobak -C '/bin/cp /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.old.sql /srv/bak/live/{{ grains['nodename'] }}/mariadb-{{ db }}/{{ db }}.sql'
 {%- endfor %}

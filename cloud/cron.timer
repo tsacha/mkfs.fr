@@ -1,0 +1,10 @@
+[Unit]
+Description=owncloud cron.php job
+
+[Timer]
+OnCalendar=*-*-* *:0/5:20
+Persistent=true
+Unit=cron-owncloud.service
+
+[Install]
+WantedBy=basic.target

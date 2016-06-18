@@ -4,8 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
+Environment=VIRTUAL_ENV="/opt/venv"
+Environment=PATH="$VIRTUAL_ENV/bin:$PATH"
 ExecStartPre=/usr/bin/sleep 3
-ExecStart=/usr/bin/salt-master
+ExecStart=/opt/venv/bin/salt-master
 
 [Install]
 WantedBy=multi-user.target

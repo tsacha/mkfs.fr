@@ -108,9 +108,12 @@ mx crt:
     - user: root
     - group: root
     - mode: 440
-    - source: 'salt://private/certs/live/{{ pillar['mx']['cert'] }}/cert.pem'
+    - source: /etc/ssl/certs/{{ pillar['mx']['cert'] }}.crt
     - require:
-      - pkg: dovecot    
+      - pkg: dovecot
+      - file: crt {{ pillar['mx']['cert'] }}
+    - watch:
+      - file: crt {{ pillar['mx']['cert'] }}
     - require_in:
       - service: dovecot
       - service: postfix
@@ -123,9 +126,12 @@ mx ca:
     - user: root
     - group: root
     - mode: 440
-    - source: 'salt://private/certs/live/{{ pillar['mx']['cert'] }}/chain.pem'
+    - source: /etc/ssl/certs/{{ pillar['mx']['cert'] }}.crt
     - require:
-      - pkg: dovecot    
+      - pkg: dovecot
+      - file: key {{ pillar['mx']['cert'] }}
+    - watch:
+      - file: key {{ pillar['mx']['cert'] }}
     - require_in:
       - service: dovecot
       - service: postfix
@@ -139,7 +145,7 @@ mx key:
     - user: root
     - group: root
     - mode: 440
-    - source: 'salt://private/certs/live/{{ pillar['mx']['cert'] }}/privkey.pem'
+    - source: /etc/ssl/private/{{ pillar['mx']['cert'] }}.key
     - require:
       - pkg: dovecot
     - require_in:

@@ -15,6 +15,7 @@ base:
     - certs.create
   's2.mkfs.fr':
     - sup.agent
+  'bak.local':
     - bak/server
   'dns*.local':
     - dns

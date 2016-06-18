@@ -7,6 +7,7 @@ $TTL 1d
 {%- else %}
   {%- set ip6 = raw6 %}
 {%- endif %}
+{%- if ip6 is defined %}
 {% set domain = "convert("+ip6+", "+pillar['network']['physical'][host]['public_cidr6']|string+")" %}
 $ORIGIN {{ domain }}
 {%- set soa = pillar['zones']['common']['SOA']['@'] %}
@@ -22,7 +23,7 @@ $ORIGIN {{ domain }}
 
 {%- for chost in pillar['network']['hosts'] %}
 {%- set prefix = pillar['network']['hosts'][chost] %}
-{%- if prefix['virtual'] == 'LXC' and prefix['host'] == host %}
+{%- if prefix['virtual'] == 'lxc' and prefix['host'] == host %}
 convert({{ prefix['ip'][1] }}, 128) IN PTR {{ chost.split('.')[0] }}.{{ pillar['network']['common']['root_domain'] }}.
 {%- endif %}
 
@@ -31,3 +32,4 @@ convert({{ ip6 }}, 128) IN PTR {{ chost }}.
 {%- endif %}
 
 {%- endfor %}
+{%- endif %}

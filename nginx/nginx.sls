@@ -1,13 +1,12 @@
 {% if grains['os'] == 'Fedora' %}
-nginx-repo:
-  pkgrepo.managed:
-    - humanname: Nginx Mainline
-    - baseurl: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/fedora-23-$basearch/
-    - gpgcheck: 1
-    - gpgkey: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/pubkey.gpg
-    - require_in:
-      - pkg: nginx
-
+# nginx-repo:
+#   pkgrepo.managed:
+#     - humanname: Nginx Mainline
+#     - baseurl: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/fedora-23-$basearch/
+#     - gpgcheck: 1
+#     - gpgkey: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/pubkey.gpg
+#     - require_in:
+#       - pkg: nginx
 {% set nginx_user = 'nginx' %}
 {% elif grains['os'] == 'Debian' %}
 {% set nginx_user = 'www-data' %}
@@ -16,7 +15,7 @@ nginx-repo:
 nginx:
   pkg.installed:
 {% if grains['os'] == 'Fedora' %}  
-    - name: nginx-mainline
+    - name: nginx
 {% elif grains['os'] == 'Debian' %}
     - name: nginx
 {% endif %}
@@ -29,6 +28,15 @@ generate dh:
     - timeout: 7200
     - require:
       - pkg: nginx
+
+nginx cache directory:
+  file.directory:
+    - name: /var/cache/nginx
+    - owner: nginx
+    - group: nginx
+    - mode: 775
+    - watch_in:
+      - service: start nginx
 
 nginx configuration:
   file.managed:
@@ -45,5 +53,6 @@ start nginx:
     - reload: true
     - require:
       - file: nginx configuration
+      - file: nginx cache directory
       - cmd: generate dh
       - pkg: nginx

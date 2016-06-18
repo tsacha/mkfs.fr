@@ -14,7 +14,11 @@
 # SELinux about this change.
 # semanage port -a -t ssh_port_t -p tcp #PORTNUMBER
 #
+{%- if grains['virtual']|lower == 'lxc' %}
+Port 22
+{%- else %}
 Port 2212
+{%- endif %}
 #AddressFamily any
 #ListenAddress 0.0.0.0
 #ListenAddress ::

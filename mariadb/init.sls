@@ -1,9 +1,6 @@
 mariadb-server:
   pkg.installed
 
-python2-PyMySQL:
-  pkg.installed
-
 mariadb:
   service.running:
     - enable: true
@@ -15,6 +12,8 @@ set_localhost_root_password:
     - host: localhost
     - password: {{ pillar['mariadb']['pwd'] }}
     - connection_pass: ""
+    - onlyif:
+      - mysql -B --password="{{ pillar['mariadb']['pwd'] }}" mysql -e "show tables;"'
     - require:
       - service: mariadb
 
@@ -25,12 +24,11 @@ mysql-secure-installation:
     - require:
       - service: mariadb
       - mysql_user: set_localhost_root_password
-      - pkg: python2-PyMySQL
   mysql_user.absent:
     - name: ""
     - connection_pass: "{{ pillar['mariadb']['pwd'] }}"
     - require:
       - service: mariadb
       - mysql_user: set_localhost_root_password
-      - pkg: python2-PyMySQL
+
 

@@ -28,12 +28,14 @@ gems:
       - fastimage
       - redcarpet
       - pygments.rb
+      - bigdecimal
+      - json
     - require:
       - pkg: ruby.packages
 
 generate blog:
   cmd.wait:
-    - name: /usr/local/bin/jekyll
+    - name: /usr/local/bin/jekyll build
     - cwd: /opt/s.tremoureux.fr
     - require:
       - gem: gems

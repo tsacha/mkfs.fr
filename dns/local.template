@@ -84,7 +84,7 @@ $ORIGIN local.
 
 {%- for host in pillar['network']['hosts'] %}
 {%- set suffix = pillar['network']['hosts'][host] %}
-  {%- if suffix['virtual'] == "LXC" %}
+  {%- if suffix['virtual'] == "lxc" %}
     {%- for ip in suffix['ip'] %}
       {%- if ":" in ip %}
 {{ host }}. IN AAAA {{ ip }}
@@ -108,7 +108,11 @@ $ORIGIN local.
     {%- else %}
       {%- set ip6 = raw6 %}
     {%- endif %}
+    {%- if ip is defined %}
 {{ host.split('.')[0] }}.local. IN A {{ ip }}
+    {%- endif %}
+    {%- if ip6 is defined %}
 {{ host.split('.')[0] }}.local. IN AAAA {{ ip6 }}
+    {% endif %}
   {%- endif %}
 {%- endfor %}

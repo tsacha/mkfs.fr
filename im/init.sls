@@ -11,9 +11,9 @@ prosody-trunk:
 dependencies prosody:
   pkg.installed:
     - pkgs:
+      - lua-sec-prosody
       - lua-bit32
       - lua-ldap
-      - lua-sec-prosody
       - lua-filesystem
       - lua-expat
       - lua-socket
@@ -22,13 +22,12 @@ dependencies prosody:
 
 {% for cert in pillar['certs'] %}
 im crt {{ cert }}:
-  file.copy:
+  file.managed:
     - name: /etc/prosody/certs/{{ cert }}.crt
     - user: prosody
     - group: prosody
     - mode: 644
     - makedirs: true
-    - force: true
     - source: /etc/ssl/certs/{{ cert }}.crt
     - pkg:
       - pkg: prosody-trunk
@@ -41,13 +40,12 @@ im crt {{ cert }}:
       - service: start prosody
 
 im key {{ cert }}:
-  file.copy:
+  file.managed:
     - name: /etc/prosody/certs/{{ cert }}.key
     - user: prosody
     - group: prosody
     - mode: 400
     - makedirs: true
-    - force: true
     - source: /etc/ssl/private/{{ cert }}.key
     - require:
       - pkg: prosody-trunk
@@ -109,23 +107,3 @@ download modules:
     - user: prosody
     - require:
       - file: /opt/prosody
-# 
-# # 
-# # 
-# # #auth_ldap:
-# # #  file.managed:
-# # #    - name: /lib/prosody/modules/mod_auth_ldap2.lua
-# # #    - user: prosody
-# # #    - group: prosody
-# # #    - mode: 644
-# # #    - source: 'salt://im/mod_auth_ldap2.lua'
-# # #    - template: jinja
-# # #
-# # #lib_ldap:
-# # #  file.managed:
-# # #    - name: /opt/prosody/lib/prosody/modules/ldap.lib.lua
-# # #    - user: prosody
-# # #    - group: prosody
-# # #    - mode: 644
-# # #    - source: 'salt://im/ldap.lib.lua'
-# # #    - template: jinja

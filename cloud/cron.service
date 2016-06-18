@@ -1,0 +1,14 @@
+[Unit]
+Description=owncloud cron job
+Wants=cron-owncloud.timer
+
+[Service]
+User=apache
+Type=simple
+Nice=19
+IOSchedulingClass=2
+IOSchedulingPriority=7
+ExecStart=/usr/bin/php -f /srv/web/cloud/cron.php 1>/dev/null
+
+[Install]
+WantedBy=basic.target
