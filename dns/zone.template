@@ -39,7 +39,19 @@ $ORIGIN {{ zone[1] }}
 {%- endfor -%}
 {%- endif -%}
 
-{% if pillar['zones'][current]['A'] is defined -%}
+{%- if current == pillar['network']['common']['root_domain']+'.' %}
+{%- for host in pillar['network']['hosts'] %}
+{% if pillar['network']['hosts'][host]['virtual'] == 'lxc' %}
+{%- for master in pillar['network']['hosts'] %}
+{%- if pillar['network']['hosts'][master]['virtual'] == 'physical' and pillar['network']['hosts'][master]['host'] == pillar['network']['hosts'][host]['host'] %}
+{{ host.split('.')[0] }} IN A {{ pillar['network']['hosts'][master]['ip'][0] }}
+{%- endif %}
+{%- endfor %}
+{{ host.split('.')[0] }} IN AAAA {{ pillar['network']['hosts'][host]['ip'][1] }}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- if pillar['zones'][current]['A'] is defined -%}
 {%- for entry in pillar['zones'][current]['A'] %}
 {%- for address in pillar['zones'][current]['A'][entry] %}
 {%- if "grains" in address %}
