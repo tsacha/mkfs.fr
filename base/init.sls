@@ -126,6 +126,9 @@ auditd:
   service.dead:
     - disabled: true
 {% else %}
+mosh:
+  pkg.installed
+
 ntp:
   pkg.installed
 
