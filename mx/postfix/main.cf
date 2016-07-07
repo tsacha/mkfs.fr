@@ -1,6 +1,6 @@
 compatibility_level = 2
 mail_owner = postfix
-myhostname = {{ grains['nodename'] }}
+myhostname = {{ grains['nodename'].split('.')[0] }}.{{ pillar['network']['common']['root_domain'] }}
 inet_interfaces = all
 
 virtual_mailbox_domains = ldap:/etc/postfix/ldap-domains.cf
