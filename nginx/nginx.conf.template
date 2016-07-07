@@ -94,7 +94,6 @@ http {
   ssl_buffer_size 16k;
   ssl_dhparam                   '/etc/nginx/dhparams.pem';
   ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
-  ssl_ecdh_curve secp384r1;  
   ssl_prefer_server_ciphers     on;
   
   ssl_session_tickets on;

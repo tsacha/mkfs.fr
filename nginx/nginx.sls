@@ -1,12 +1,12 @@
 {% if grains['os'] == 'Fedora' %}
-# nginx-repo:
-#   pkgrepo.managed:
-#     - humanname: Nginx Mainline
-#     - baseurl: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/fedora-23-$basearch/
-#     - gpgcheck: 1
-#     - gpgkey: https://copr-be.cloud.fedoraproject.org/results/cbrspc/nginx-mainline/pubkey.gpg
-#     - require_in:
-#       - pkg: nginx
+nginx-repo:
+  pkgrepo.managed:
+    - humanname: Nginx Mainline
+    - baseurl: https://copr-be.cloud.fedoraproject.org/results/kyl191/nginx-mainline/fedora-$releasever-$basearch/
+    - gpgcheck: 1
+    - gpgkey: https://copr-be.cloud.fedoraproject.org/results/kyl191/nginx-mainline/pubkey.gpg
+    - require_in:
+      - pkg: nginx
 {% set nginx_user = 'nginx' %}
 {% elif grains['os'] == 'Debian' %}
 {% set nginx_user = 'www-data' %}
@@ -15,7 +15,7 @@
 nginx:
   pkg.installed:
 {% if grains['os'] == 'Fedora' %}  
-    - name: nginx
+    - name: nginx-mainline
 {% elif grains['os'] == 'Debian' %}
     - name: nginx
 {% endif %}
