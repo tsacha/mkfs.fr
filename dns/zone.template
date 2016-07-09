@@ -55,7 +55,7 @@ $ORIGIN {{ zone[1] }}
 {%- for entry in pillar['zones'][current]['A'] %}
 {%- for address in pillar['zones'][current]['A'][entry] %}
 {%- if "grains" in address %}
-{%- if grains[address.split(':')[1]] is defined -%}
+{%- if grains[address.split(':')[1]] is defined and grains[address.split(':')[1]] -%}
 {%- set naddress = grains[address.split(':')[1]] -%}
 {%- if ":" in naddress %}
 {{ entry }} IN AAAA {{ naddress }}
