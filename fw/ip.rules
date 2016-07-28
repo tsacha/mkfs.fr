@@ -63,8 +63,10 @@ COMMIT
         {%- endif %}
       {%- else %}
         {%- set in_ip4 = pillar['network']['hosts'][server]['ip'][0] %}
-      {%- endif %}    
--A INPUT -s {{ in_ip4 }}/32 -i {{ pillar['network'][grains['virtual']|lower][suffix]['int'] }} -j ACCEPT 
+      {%- endif %}
+      {%- if in_ip4 %}
+-A INPUT -s {{ in_ip4 }}/32 -i {{ pillar['network'][grains['virtual']|lower][suffix]['int'] }} -j ACCEPT
+      {%- endif %}
     {%- endif %}
   {%- endfor %}
 {%- endif %}

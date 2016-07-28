@@ -122,9 +122,11 @@ add limits.conf:
     - template: jinja
 
 {% if grains['virtual']|lower == 'lxc' %}
+{% if grains['os'] == 'Fedora' %}
 auditd:
   service.dead:
     - disabled: true
+{% endif %}
 {% else %}
 mosh:
   pkg.installed

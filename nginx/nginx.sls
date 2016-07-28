@@ -32,8 +32,8 @@ generate dh:
 nginx cache directory:
   file.directory:
     - name: /var/cache/nginx
-    - owner: nginx
-    - group: nginx
+    - user: {{ nginx_user }}
+    - group: {{ nginx_user }}
     - mode: 775
     - watch_in:
       - service: start nginx
