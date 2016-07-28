@@ -7,7 +7,7 @@ dovecot-pigeonhole:
 dovecot-antispam:
   pkg.installed:
     - sources:
-      - dovecot-antispam: 'salt://mx/dovecot-antispam/RPMS/x86_64/dovecot-antispam-2.0-2.fc24.x86_64.rpm'
+      - dovecot-antispam: 'salt://mx/dovecot-antispam/RPMS/x86_64/dovecot-antispam-2.0-3.fc24.x86_64.rpm'
 
 
 # dovecot-antispam-repo:
