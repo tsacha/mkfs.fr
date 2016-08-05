@@ -3,6 +3,8 @@ mail_owner = postfix
 myhostname = {{ grains['nodename'].split('.')[0] }}.{{ pillar['network']['common']['root_domain'] }}
 inet_interfaces = all
 
+message_size_limit = 204800000
+
 virtual_mailbox_domains = ldap:/etc/postfix/ldap-domains.cf
 virtual_alias_maps = ldap:/etc/postfix/ldap-aliases.cf
 virtual_mailbox_maps = ldap:/etc/postfix/ldap-accounts.cf
